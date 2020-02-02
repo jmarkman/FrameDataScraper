@@ -2,7 +2,7 @@ import requests
 import character as dto
 from bs4 import BeautifulSoup
 
-class FrameDataParser(object):
+class ScrapeEngine(object):
 
     ufdUrl = 'https://ultimateframedata.com/'
 

@@ -5,14 +5,21 @@ import bs4 as BeautifulSoup
 class Character(object):
     """A DTO for a given character's frame data.
 
-    Keyword arguments:
-    name -- The name of the character
-    ground -- The frame data for the character's ground attacks as a CharacterGroundAttacks object
-    aerial -- The frame data for the character's aerials as a CharacterAerialAttacks object
-    special -- The frame data for the character's specials as a CharacterSpecialAttacks object
-    throw -- The frame data for the character's throws as a CharacterThrowAttacks object
-    dodges -- The frame data for the character's dodges as a CharacterDodgeAttributes object
-    misc -- Various character data such as weight, move speed, air accel, etc., as a CharacterMiscAttributes object
+    Args:
+        name:
+            The name of the character
+        ground:
+            The frame data for the character's ground attacks as a CharacterGroundAttacks object
+        aerial:
+            The frame data for the character's aerials as a CharacterAerialAttacks object
+        special:
+            The frame data for the character's specials as a CharacterSpecialAttacks object
+        throw:
+            The frame data for the character's throws as a CharacterThrowAttacks object
+        dodges:
+            The frame data for the character's dodges as a CharacterDodgeAttributes object
+        misc:
+            Various character data such as weight, move speed, air accel, etc., as a CharacterMiscAttributes object
     """
     def __init__(self, name, ground, aerial, special, throw, dodges, misc):
         self.character_name = name
