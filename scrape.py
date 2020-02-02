@@ -1,13 +1,7 @@
-# import FrameDataParser
-import requests
-from bs4 import BeautifulSoup
+import framedataparser as fdp
 
-dkDataPage = requests.get("https://ultimateframedata.com/wario.php")
+data_parser = fdp.FrameDataParser('wario')
+wario_html = data_parser.get_page_for_character_name()
+wario_data = data_parser.get_frame_data(wario_html)
 
-parsedDonkeyKongPage = BeautifulSoup(dkDataPage.text, 'lxml')
-
-normals = parsedDonkeyKongPage.find_all("div", class_="moves")
-
-jab = normals[0].find_all("div", class_="movecontainer")
-
-print(jab[0].find("div", class_="movename").text)
+print("ayyy")
