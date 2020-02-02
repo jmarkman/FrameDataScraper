@@ -1,12 +1,13 @@
+# import FrameDataParser
 import requests
-import webbrowser
-
 from bs4 import BeautifulSoup
 
-dkDataPage = requests.get("https://ultimateframedata.com/donkey_kong.php")
+dkDataPage = requests.get("https://ultimateframedata.com/wario.php")
 
 parsedDonkeyKongPage = BeautifulSoup(dkDataPage.text, 'lxml')
 
 normals = parsedDonkeyKongPage.find_all("div", class_="moves")
 
-print(normals[0])
+jab = normals[0].find_all("div", class_="movecontainer")
+
+print(jab[0].find("div", class_="movename").text)
