@@ -41,35 +41,7 @@ class ScrapeEngine(object):
         for move in move_html:
             m = self.__get_move_from_container(move)
             move_list.append(m)
-        return move_list
-
-    def __get_throws_frame_data(self, throw_container):
-        parser = hdp.HtmlDataParser(throw_container)
-        html_classes = [
-            "movename", "startup",
-            "totalframes", "landinglag",
-            "notes", "basedamage"
-        ]
-        parsed_data = {}
-        for c in html_classes:
-            data = parser.get_data_from_element("div", c)
-            parsed_data[c] = data
-        return dto.CharacterThrow(parsed_data)
-
-    def __get_dodges_frame_data(self, dodge_container):
-        parser = hdp.HtmlDataParser(dodge_container)
-        html_classes = [
-            "movename", "totalframes",
-            "landinglag", "notes"
-        ]
-        parsed_data = {}
-        for c in html_classes:
-            data = parser.get_data_from_element("div", c)
-            parsed_data[c] = data
-        return dto.CharacterDodge(parsed_data)
-
-    def __get_misc_data(self, misc_attributes):
-        return []
+        return move_list   
 
     def __get_move_from_container(self, attack_container):
         parser = hdp.AttackDataParser(attack_container)
@@ -87,3 +59,49 @@ class ScrapeEngine(object):
                 data = parser.get_data_from_element("div", c)
             parsed_data[c] = data
         return dto.CharacterAttack(parsed_data)
+
+    def __get_throws_frame_data(self, throws):
+        throw_html = throws.find_all("div", class_="movecontainer")
+        throw_list = []
+        for throw in throw_html:
+            t = self.__get_throw_from_container(throw)
+            throw_list.append(t)
+        return throw_list
+
+    def __get_throw_from_container(self, throw_container):
+        parser = hdp.HtmlDataParser(throw_container)
+        html_classes = [
+            "movename", "startup",
+            "totalframes", "landinglag",
+            "notes", "basedamage"
+        ]
+        parsed_data = {}
+        for c in html_classes:
+            data = parser.get_data_from_element("div", c)
+            parsed_data[c] = data
+        return dto.CharacterThrow(parsed_data)       
+
+    def __get_dodges_frame_data(self, dodges):
+        dodge_html = dodges.find_all("div", class_="movecontainer")
+        dodge_list = []
+        for dodge in dodge_html:
+            d = self.__get_dodge_from_container(dodge)
+            dodge_list.append(d)
+        return dodge_list
+
+    def __get_dodge_from_container(self, dodge_container):
+        parser = hdp.HtmlDataParser(dodge_container)
+        html_classes = [
+            "movename", "totalframes",
+            "landinglag", "notes"
+        ]
+        parsed_data = {}
+        for c in html_classes:
+            data = parser.get_data_from_element("div", c)
+            parsed_data[c] = data
+        return dto.CharacterDodge(parsed_data)
+
+    def __get_misc_data(self, misc_attributes):
+        return []
+
+
