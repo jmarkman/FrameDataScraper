@@ -95,37 +95,16 @@ class CharacterMiscAttributes(object):
 
 class CharacterAction(object):
     """Represents the data for any possible action that a character could perform while in combat"""
-    def __init__(self, html):
-        self.html = html
-        self.name = self.__extract_move_name()
-        self.total_frames = self.__extract_total_frames()
-        self.landing_lag = self.__extract_landing_lag()
-        self.notes = self.__extract_notes()
-    
-    def __extract_move_name(self):
-        """Extract the name of the move from the move container html element"""
-        move_name = self.html.find("div", class_="movename").text
-        return move_name.strip()
-
-    def __extract_total_frames(self):
-        """Extract the total number of frames of the move from the move container html element"""
-        total_frames = self.html.find("div", class_="totalframes").text
-        return total_frames.strip()
-    
-    def __extract_landing_lag(self):
-        """Extract the landing lag from the move container html element"""
-        landing_lag = self.html.find("div", class_="landinglag").text
-        return landing_lag.strip()
-
-    def __extract_notes(self):
-        """Extract any miscellaneous notes about the action from the move container html element"""
-        notes = self.html.find("div", class_="notes").text
-        return notes.strip()
+    def __init__(self, action_dict):
+        self.name = action_dict["movename"]
+        self.total_frames = action_dict["totalframes"]
+        self.landing_lag = action_dict["landinglag"]
+        self.notes = action_dict["notes"]
 
 class CharacterDodge(CharacterAction):
     """Represents the data for possible dodges a characterr could make while in combat"""
-    def __init__(self, html):
-        super().__init__(html)
+    def __init__(self, dodge_dict):
+        super().__init__(dodge_dict)
 
 # Ugh. There's a weird edge case that isn't covered in the move abstraction.
 # TODO: Revisit the class hierarchy to fix this weird abstraction "failure"
@@ -133,87 +112,24 @@ class CharacterThrow(CharacterAction):
     """Represents any possible throw a character can perform while in combat.
     Does not include command grabs.
     """
-    def __init__(self, html):
-        super().__init__(html)
+    def __init__(self, throw_dict):
+        super().__init__(throw_dict)
         # Going to take an L here and just attach the properties and
         # associated methods to this class and derive from the base
         # CharacterAction class. I wanted to derive from the CharacterAttack
         # class below, but this is still just a DTO
-        self.startup_frames = self.__extract_startup_frames()
-        self.base_damage = self.__extract_base_damage()
-
-    def __extract_startup_frames(self):
-        """Extract the startup frames from the move container html element"""
-        startup = self.html.find("div", class_="startup").text
-        return startup.strip()
-
-    def __extract_base_damage(self):
-        """Extract the base damage of the action from the move container html element"""
-        base_damage = self.html.find("div", class_="basedamage").text
-        return base_damage.strip()
+        self.startup_frames = throw_dict["startup"]
+        self.base_damage = throw_dict["basedamage"]
 
 class CharacterAttack(CharacterAction):
     """Represents the data for any aggressive attack a character could make while in combat"""
-    def __init__(self, html):
+    def __init__(self, attack_dict):
         super().__init__(html)
-        self.startup_frames = self.__extract_startup_frames()
-        self.base_damage = self.__extract_base_damage()
-        self.shield_lag = self.__extract_shield_lag()
-        self.shield_stun = self.__extract_shield_stun()
-        self.multiple_hitboxes = self.__extract_multiple_hitboxes()
-        self.advantage = self.__extract_advantage()
-        self.active_frames = self.__extract_active_frames()
-        self.hitbox = self.__extract_hitbox()
-        
-    def __extract_startup_frames(self):
-        """Extract the startup frames from the move container html element"""
-        startup = self.html.find("div", class_="startup").text
-        return startup.strip()
-
-    def __extract_base_damage(self):
-        """Extract the base damage of the action from the move container html element"""
-        base_damage = self.html.find("div", class_="basedamage").text
-        return base_damage.strip()
-
-    def __extract_shield_lag(self):
-        """Extract the base damage of the action from the move container html element"""
-        base_damage = self.html.find("div", class_="shieldlag").text
-        return base_damage.strip()
-
-    def __extract_shield_stun(self):
-        """Extract the amount of shield stun from the move container html element"""
-        shield_stun = self.html.find("div", class_="shieldstun").text
-        return shield_stun.strip()
-
-    def __extract_multiple_hitboxes(self):
-        """Extract the number of extra hitboxes from the move container html element"""
-        mult_hboxes = self.html.find("div", class_="whichhitbox").text
-        return mult_hboxes.strip()
-
-    def __extract_advantage(self):
-        """Extract the base damage of the action from the move container html element"""
-        adv = self.html.find("div", class_="advantage").text
-        return adv.strip()
-
-    def __extract_active_frames(self):
-        """Extract the base damage of the action from the move container html element"""
-        active_frames = self.html.find("div", class_="activeframes").text
-        return active_frames.strip()
-
-    def __extract_hitbox(self):
-        """
-        Extract the hitbox animations from the move container html element.
-        Since moves can have attributes such as different angles, some moves might
-        have multiple hitbox animations.
-
-        TODO: New characters might not have hitbox visualizations, some characters
-        might not have hitbox visualizations
-        """
-        hitboxes = self.html.find_all("img")
-        hitboxImgUrls = []
-        if len(hitboxes) < 1:
-           return hitboxImgUrls        
-        for h in hitboxes:
-            url = h['src'].strip()
-            hitboxImgUrls.append(url)
-        return hitboxImgUrls
+        self.startup_frames = attack_dict["startup"]
+        self.base_damage = attack_dict["basedamage"]
+        self.shield_lag = attack_dict["shieldlag"]
+        self.shield_stun = attack_dict["shieldstun"]
+        self.multiple_hitboxes = attack_dict["whichhitbox"]
+        self.advantage = attack_dict["advantage"]
+        self.active_frames = attack_dict["activeframes"]
+        self.hitbox = attack_dict["hitboximg"]

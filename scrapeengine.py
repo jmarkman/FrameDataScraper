@@ -1,4 +1,5 @@
 import requests
+import dataparser as hdp
 import character as dto
 from bs4 import BeautifulSoup
 
@@ -29,8 +30,11 @@ class ScrapeEngine(object):
     def __get_attack_move_frame_data(self, moves):
         """Retrieves the ground moves from the character's frame data page
 
-        Keyword arguments:
-        moves -- The html elements that represent the current section of moves on the character page
+        Args:
+            moves:
+                The html elements that represent the current section of moves on the character page
+        Returns:
+            A list of html elements that represent a given move's data
         """
         move_html = moves.find_all("div", class_="movecontainer")
         move_list = []
@@ -40,16 +44,49 @@ class ScrapeEngine(object):
         return move_list
 
     def __get_throws_frame_data(self, throw_container):
-        return dto.CharacterThrow(throw_container)
+        parser = hdp.HtmlDataParser(throw_container)
+        html_classes = [
+            "movename", "startup",
+            "totalframes", "landinglag",
+            "notes", "basedamage"
+            ]
+        parsed_data = {}
+        for c in html_classes:
+            data = parser.get_data_from_element("div", c)
+            parsed_data[c] = data
+        return dto.CharacterThrow(parsed_data)
 
     def __get_dodges_frame_data(self, dodge_container):
-        return dto.CharacterDodge(dodge_container)
+        parser = hdp.HtmlDataParser(dodge_container)
+        html_classes = [
+            "movename", "totalframes", 
+            "landinglag", "notes"
+            ]
+        parsed_data = {}
+        for c in html_classes:
+            data = parser.get_data_from_element("div", c)
+            parsed_data[c] = data
+        return dto.CharacterDodge(parsed_data)
 
     def __get_misc_data(self, misc_attributes):
         return []
 
     def __get_move_from_container(self, attack_container):
-        return dto.CharacterAttack(attack_container)
+        parser = hdp.AttackDataParser(attack_container)
+        html_classes = [
+            "hitboximg", "movename", "startup",
+            "totalframes", "landinglag", "notes",
+            "basedamage", "shieldlag", "shieldstun",
+            "whichhitbox", "advantage", "activeframes"
+            ]
+        parsed_data = {}
+        for c in html_classes:
+            if c == "hitboximg":
+                data = parser.extract_hitbox()
+            else:
+                data = parser.get_data_from_element("div", c)
+            parsed_data[c] = data
+        return dto.CharacterAttack(parsed_data)
 
 
     
