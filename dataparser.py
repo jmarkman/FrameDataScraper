@@ -58,6 +58,7 @@ class MiscDataParser(HtmlDataParser):
             split_text_data = d.text.split('-')
             if "/" in split_text_data[0]:
                 # split by backslash, then add
+                pass
             else:
                 misc_data_dict[split_text_data[0]] = split_text_data[1]
 

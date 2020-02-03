@@ -23,12 +23,12 @@ class Character(object):
     """
     def __init__(self, name, ground, aerial, special, throw, dodges, misc):
         self.character_name = name
-        self.ground_attacks = ground
-        self.aerial_attacks = aerial
-        self.special_attacks = special
-        self.throw_attacks = throw
-        self.dodges = dodges
-        self.misc_data = misc
+        self.ground_attacks = CharacterGroundAttacks(ground)
+        self.aerial_attacks = CharacterAerialAttacks(aerial)
+        self.special_attacks = CharacterSpecialAttacks(special)
+        self.throw_attacks = CharacterThrowAttacks(throw)
+        self.dodges = CharacterDodgeAttributes(dodges)
+        self.misc_data = CharacterMiscAttributes(misc)
 
 class CharacterGroundAttacks(object):
     def __init__(self, moves):
@@ -37,7 +37,7 @@ class CharacterGroundAttacks(object):
         self.dash = next(d for d in moves if "dash" in d.name.lower())
         self.smashes = [s for s in moves if "smash" in s.name.lower()]
 
-class ChracterAerialAttacks(object):
+class CharacterAerialAttacks(object):
     def __init__(self, moves):
         self.neutral_air = next(n for n in moves if "neutral" in n.name.lower())
         self.forward_air = next(f for f in moves if "forward" in f.name.lower())
@@ -45,14 +45,14 @@ class ChracterAerialAttacks(object):
         self.up_air = next(u for u in moves if "up" in u.name.lower())
         self.down_air = next(d for d in moves if "down" in d.name.lower())
 
-class ChracterSpecialAttacks(object):
+class CharacterSpecialAttacks(object):
     def __init__(self, moves):
         self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
         self.side_special = next(s for s in moves if "side" in s.name.lower())
         self.up_special = next(u for u in moves if "up" in u.name.lower())
         self.down_special = next(d for d in moves if "down" in d.name.lower())
 
-class ChracterThrowAttacks(object):
+class CharacterThrowAttacks(object):
     def __init__(self, moves):
         self.stand_grab = next(st for st in moves if "stand" in st.name.lower())
         self.dash_grab = next(dsh for dsh in moves if "dash" in dsh.name.lower())
@@ -124,7 +124,7 @@ class CharacterThrow(CharacterAction):
 class CharacterAttack(CharacterAction):
     """Represents the data for any aggressive attack a character could make while in combat"""
     def __init__(self, attack_dict):
-        super().__init__(html)
+        super().__init__(attack_dict)
         self.startup_frames = attack_dict["startup"]
         self.base_damage = attack_dict["basedamage"]
         self.shield_lag = attack_dict["shieldlag"]

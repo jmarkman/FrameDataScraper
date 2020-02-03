@@ -49,7 +49,7 @@ class ScrapeEngine(object):
             "movename", "startup",
             "totalframes", "landinglag",
             "notes", "basedamage"
-            ]
+        ]
         parsed_data = {}
         for c in html_classes:
             data = parser.get_data_from_element("div", c)
@@ -59,9 +59,9 @@ class ScrapeEngine(object):
     def __get_dodges_frame_data(self, dodge_container):
         parser = hdp.HtmlDataParser(dodge_container)
         html_classes = [
-            "movename", "totalframes", 
+            "movename", "totalframes",
             "landinglag", "notes"
-            ]
+        ]
         parsed_data = {}
         for c in html_classes:
             data = parser.get_data_from_element("div", c)
@@ -78,7 +78,7 @@ class ScrapeEngine(object):
             "totalframes", "landinglag", "notes",
             "basedamage", "shieldlag", "shieldstun",
             "whichhitbox", "advantage", "activeframes"
-            ]
+        ]
         parsed_data = {}
         for c in html_classes:
             if c == "hitboximg":
@@ -87,6 +87,3 @@ class ScrapeEngine(object):
                 data = parser.get_data_from_element("div", c)
             parsed_data[c] = data
         return dto.CharacterAttack(parsed_data)
-
-
-    
