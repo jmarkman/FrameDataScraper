@@ -18,10 +18,14 @@ class HtmlDataParser(object):
             The inner text of the element as a string
         """
         if element_class_name is None:
-            data = self.html.find(html_element).text
+            data = self.html.find(html_element)
         else:
-            data = self.html.find(html_element, element_class_name).text
-        return data.strip()
+            data = self.html.find(html_element, element_class_name)
+
+        if data is not None:
+            return data.text.strip()
+        else:
+            return None
 
 class AttackDataParser(HtmlDataParser):
     def __init__(self, html):

@@ -54,7 +54,7 @@ class CharacterSpecialAttacks(object):
 
 class CharacterThrowAttacks(object):
     def __init__(self, moves):
-        self.stand_grab = next(st for st in moves if "stand" in st.name.lower())
+        self.stand_grab = next(st for st in moves if st.name.lower() == "grab")
         self.dash_grab = next(dsh for dsh in moves if "dash" in dsh.name.lower())
         self.pivot_grab = next(pvt for pvt in moves if "pivot" in pvt.name.lower())
         self.pummel = next(pml for pml in moves if "pummel" in pml.name.lower())
@@ -118,6 +118,7 @@ class CharacterThrow(CharacterAction):
         # associated methods to this class and derive from the base
         # CharacterAction class. I wanted to derive from the CharacterAttack
         # class below, but this is still just a DTO
+        self.hitbox = throw_dict["hitboximg"]
         self.startup_frames = throw_dict["startup"]
         self.base_damage = throw_dict["basedamage"]
 
