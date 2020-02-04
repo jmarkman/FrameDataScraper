@@ -118,6 +118,7 @@ class CharacterThrow(CharacterAction):
         # associated methods to this class and derive from the base
         # CharacterAction class. I wanted to derive from the CharacterAttack
         # class below, but this is still just a DTO
+        self.hitbox = throw_dict["hitboximg"]
         self.startup_frames = throw_dict["startup"]
         self.base_damage = throw_dict["basedamage"]
 
