@@ -36,6 +36,8 @@ class ScrapeEngine(object):
         # There are 6 sections: ground moves, aerials, specials, throws, dodges, and misc info
         char_moves = page_data.find_all("div", class_="moves")
 
+        char_moves = self.__ensure_containers_hold_moves(char_moves)
+
         ground_data = self.__get_action_frame_data(char_moves[0])
         aerial_data = self.__get_action_frame_data(char_moves[1])
         specials_data = self.__get_action_frame_data(char_moves[2])
@@ -103,6 +105,24 @@ class ScrapeEngine(object):
             return dto.CharacterThrow(parsed_data_dict)
         else:
             return dto.CharacterAttack(parsed_data_dict)
+
+    def __ensure_containers_hold_moves(self, retrieved_elements):
+        """Some characters like Bowser might have extraneous information placed in 'move' 
+        tags for some reason. Ensure that the move containers ONLY hold moves and not one-off
+        pieces of data.
+
+        Args:
+            retrieved_elements: the html containers that hold all of the character's moves
+        Returns:
+            A sliced list that skips the first container if it has extraneous information.
+            Else, returns the original list.
+        """
+        dumb_container = retrieved_elements[0].get('class') == ['movecontainer plain']
+        if dumb_container == False:
+            return retrieved_elements
+        else:
+            return retrieved_elements[1:]
+            
 
     def __get_misc_data(self, misc_attributes):
         return []
