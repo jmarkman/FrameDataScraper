@@ -79,6 +79,8 @@ class ScrapeEngine(object):
             # or empty hitbox visualization lists)
             if data is None or not data:
                 continue
+            elif not data and c == "hitboximg":
+                parsed_data[c] = None
             else:
                 parsed_data[c] = data
         return self.__generate_dto(parsed_data)

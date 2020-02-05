@@ -133,4 +133,7 @@ class CharacterAttack(CharacterAction):
         self.multiple_hitboxes = attack_dict["whichhitbox"]
         self.advantage = attack_dict["advantage"]
         self.active_frames = attack_dict["activeframes"]
-        self.hitbox = attack_dict["hitboximg"]
+        # Some character attacks don't even have hitbox sections (?????)
+        # so if there's no value assoc w/ the hitbox key, assign None so
+        # the attack class can still be instantiated
+        self.hitbox = attack_dict.get("hitboximg", None)
