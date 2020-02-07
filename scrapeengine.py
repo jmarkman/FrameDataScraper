@@ -79,10 +79,11 @@ class ScrapeEngine(object):
             # If the element couldn't be found, skip it and try the next
             # (This covers elements that BS4 reports as nonexistent 
             # or empty hitbox visualization lists)
-            if data is None or not data:
-                continue
-            elif not data and c == "hitboximg":
-                parsed_data[c] = None
+            if data is None:
+                if c == "hitboximg":
+                    parsed_data[c] = None
+                else:
+                    continue
             else:
                 parsed_data[c] = data
         return self.__generate_dto(parsed_data)
