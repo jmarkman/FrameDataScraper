@@ -122,6 +122,12 @@ class CharacterThrow(CharacterAction):
         self.startup_frames = throw_dict["startup"]
         self.base_damage = throw_dict["basedamage"]
 
+class CharacterThrowActiveFrames(CharacterThrow):
+    """Some characters have grabs/throws with active frames, like Kirby."""
+    def __init__(self, throw_dict):
+        super().__init__(throw_dict)
+        self.active_frames = throw_dict["activeframes"]
+
 class CharacterAttack(CharacterAction):
     """Represents the data for any aggressive attack a character could make while in combat"""
     def __init__(self, attack_dict):
@@ -132,7 +138,7 @@ class CharacterAttack(CharacterAction):
         self.shield_stun = attack_dict["shieldstun"]
         self.multiple_hitboxes = attack_dict["whichhitbox"]
         self.advantage = attack_dict["advantage"]
-        self.active_frames = attack_dict["activeframes"]
+        self.active_frames = attack_dict.get("activeframes", None)
         # Some character attacks don't even have hitbox sections (?????)
         # so if there's no value assoc w/ the hitbox key, assign None so
         # the attack class can still be instantiated

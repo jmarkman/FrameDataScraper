@@ -98,12 +98,14 @@ class ScrapeEngine(object):
         """
         keys_in_pdd = len(list(parsed_data_dict.keys()))
         # A dodge has 4 items: name, total frames, landing lag, and any misc notes
-        if keys_in_pdd == 4:
+        if keys_in_pdd == 4 or keys_in_pdd == 5:
             return dto.CharacterDodge(parsed_data_dict)
         # A throw has 7 items: 4 from the base class, a hitbox visualization,
         # startup frames, and base damage
         elif keys_in_pdd == 7:
             return dto.CharacterThrow(parsed_data_dict)
+        elif keys_in_pdd == 8:
+            return dto.CharacterThrowActiveFrames(parsed_data_dict)
         else:
             return dto.CharacterAttack(parsed_data_dict)
 
@@ -118,8 +120,8 @@ class ScrapeEngine(object):
             A sliced list that skips the first container if it has extraneous information.
             Else, returns the original list.
         """
-        dumb_container = retrieved_elements[0].get('class') == ['movecontainer plain']
-        if dumb_container == False:
+        dumb_container = retrieved_elements[0].find(lambda tag: tag.name == 'div' and tag.get('class') == ['movecontainer', 'plain'])
+        if dumb_container is None:
             return retrieved_elements
         else:
             return retrieved_elements[1:]
