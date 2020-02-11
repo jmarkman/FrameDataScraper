@@ -97,15 +97,22 @@ class ScrapeEngine(object):
             The appropriate DTO
         """
         keys_in_pdd = len(list(parsed_data_dict.keys()))
-        # A dodge has 4 items: name, total frames, landing lag, and any misc notes
+        # A dodge can have 4 or 5 different items because if you give a kid
+        # some HTML tags he'll sprinkle them everywhere, trying to make
+        # round pegs fit in square holes 
         if keys_in_pdd == 4 or keys_in_pdd == 5:
             return dto.CharacterDodge(parsed_data_dict)
-        # A throw has 7 items: 4 from the base class, a hitbox visualization,
-        # startup frames, and base damage
+        # Unless it's Terry's spot-dodge mechanic where he can u-tilt out of spot dodge
+        # because the dude who wrote this website thinks an attack is a dodge
+        elif parsed_data_dict["movename"].lower() == "spot dodge attack":
+            return dto.TerryDodge(parsed_data_dict)
+        # A throw has 7 items. 
         elif keys_in_pdd == 7:
             return dto.CharacterThrow(parsed_data_dict)
+        # Unless it has 8, then it's a throw with active frames.
         elif keys_in_pdd == 8:
             return dto.CharacterThrowActiveFrames(parsed_data_dict)
+        # Ok, now it DEFINITELY has to be an attack.
         else:
             return dto.CharacterAttack(parsed_data_dict)
 
@@ -125,7 +132,6 @@ class ScrapeEngine(object):
             return retrieved_elements
         else:
             return retrieved_elements[1:]
-            
 
     def __get_misc_data(self, misc_attributes):
         return []

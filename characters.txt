@@ -53,9 +53,9 @@ pichu
 pikachu
 piranha_plant
 pit
-squirtle
-ivysaur
-charizard
+pt_squirtle
+pt_ivysaur
+pt_charizard
 richter
 ridley
 rob

@@ -25,10 +25,27 @@ class Character(object):
         self.character_name = name
         self.ground_attacks = CharacterGroundAttacks(ground)
         self.aerial_attacks = CharacterAerialAttacks(aerial)
-        self.special_attacks = CharacterSpecialAttacks(special)
+        self.special_attacks = self.__create_mii_dto_for_specials_if_necessary(special)
         self.throw_attacks = CharacterThrowAttacks(throw)
         self.dodges = CharacterDodgeAttributes(dodges)
         self.misc_data = CharacterMiscAttributes(misc)
+
+    def __create_mii_dto_for_specials_if_necessary(self, specials):
+        """This method shouldn't have to exist"""
+        if self.character_name == "mii_brawler":
+            return MiiBrawlerSpecialAttacks(specials)
+        elif self.character_name == "mii_gunner":
+            return MiiGunnerSpecialAttacks(specials)
+        elif self.character_name == "mii_swordfighter":
+            return MiiSwordFighterSpecialAttacks(specials)
+        else:
+            return CharacterSpecialAttacks(specials)
+    
+    # def __create_terry_dto_for_dodge_if_necessary(self, dodges):
+    #     """Neither should this one, but I kinda get it since it's
+    #     a weird mechanic that no one else has
+    #     """
+    #     if 
 
 class CharacterGroundAttacks(object):
     def __init__(self, moves):
@@ -51,6 +68,54 @@ class CharacterSpecialAttacks(object):
         self.side_special = next(s for s in moves if "side" in s.name.lower())
         self.up_special = next(u for u in moves if "up" in u.name.lower())
         self.down_special = next(d for d in moves if "down" in d.name.lower())
+
+class MiiBrawlerSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii Brawler:
+    """
+    neutral_moves = ["Shot Put", "Flashing Mach Punch", "Exploding Side Kick"]
+    side_moves = ["Onslaught", "Burning Dropkick", "Suplex"]
+    up_moves = ["Soaring Axe Kick", "Helicopter Kick", "Thrust Uppercut"]
+    down_moves = ["Head-On Assault", "Feint Jump", "Counter Throw"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class MiiSwordFighterSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii SwordFighter:
+    """
+    neutral_moves = ["Gale Strike", "Shuriken of Light", "Blurring Blade"]
+    side_moves = ["Airborne Assault", "Gale Stab", "Chakram"]
+    up_moves = ["Stone Scabbard", "Skyward Slash Dash", "Hero's Spin"]
+    down_moves = ["Blade Counter", "Reversal Slash", "Power Thrust"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class MiiGunnerSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii Gunner:
+    """
+    neutral_moves = ["Charge Blast", "Laser Blaze", "Grenade Launch"]
+    side_moves = ["Flame Pillar", "Stealth Burst", "Gunner Missile"]
+    up_moves = ["Lunar Launch", "Cannon Jump Kick", "Arm Rocket"]
+    down_moves = ["Echo Reflector", "Bomb Drop", "Absorbing Vortex"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
 
 class CharacterThrowAttacks(object):
     def __init__(self, moves):
@@ -105,6 +170,20 @@ class CharacterDodge(CharacterAction):
     """Represents the data for possible dodges a characterr could make while in combat"""
     def __init__(self, dodge_dict):
         super().__init__(dodge_dict)
+
+class TerryDodge(CharacterDodge):
+    """Terry's a special snowflake and can u-tilt immediately out of spot dodge.
+    Instead of putting this in the notes for u-tilt, where it would be relevant
+    and an actual note about the move, the author of the website was like 'DUAHH
+    IT'S A DODGE GUIZ' and now Terry has become another edge case that needs to be
+    handled where a dodge attack.... has base damage....
+    """
+    def __init__(self, dodge_dict):
+        super().__init__(dodge_dict)
+        self.advantage = dodge_dict["advantage"]
+        self.hitbox = dodge_dict["hitboximg"]
+        self.active_frames = dodge_dict["activeframes"]
+        self.startup = dodge_dict["startup"]
 
 # Ugh. There's a weird edge case that isn't covered in the move abstraction.
 # TODO: Revisit the class hierarchy to fix this weird abstraction "failure"

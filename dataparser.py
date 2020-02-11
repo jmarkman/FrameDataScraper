@@ -4,20 +4,6 @@ class HtmlDataParser(object):
     """This class handles parsing out the data from the html elements representing moves"""
     def __init__(self, html):
         self.html = html
-        self.data_object_type = self.__determine_dto_type()
-
-    def __determine_dto_type(self):
-        moves = self.html.find_all("div")
-        # Dodges have been iffy, so account for them
-        if len(moves) <= 5:
-            self.data_object_type = 0 # Dodge
-        # Throws can have 6 or 7 elements because some moves won't have
-        # hitbox visualizations but others will
-        elif len(moves) <= 7 and len(moves) > 5:
-            self.data_object_type = 1 # Throw
-        # Otherwise, it's gotta be a move
-        elif len(moves) > 7:
-            self.data_object_type = 2 # Attack
 
     def get_data_from_element(self, html_element, element_class_name=None):
         """Retrieves the inner text from the specified html element
