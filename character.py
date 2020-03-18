@@ -130,10 +130,11 @@ class TerrySpecialAttacks(object):
     
     Nothing's actually different about the class fields, but the population
     for the side_special field is different because of the above difference."""
-    self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
-    self.side_special = next(s for s in moves if "forward" in s.name.lower() or "back" in s.name.lower())
-    self.up_special = next(u for u in moves if "up" in u.name.lower())
-    self.down_special = next(d for d in moves if "down" in d.name.lower())
+    def __init__(self, moves):
+        self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
+        self.side_special = next(s for s in moves if "forward" in s.name.lower() or "back" in s.name.lower())
+        self.up_special = next(u for u in moves if "up" in u.name.lower())
+        self.down_special = next(d for d in moves if "down" in d.name.lower())
 
 class CharacterThrowAttacks(object):
     def __init__(self, moves):
