@@ -25,10 +25,32 @@ class Character(object):
         self.character_name = name
         self.ground_attacks = CharacterGroundAttacks(ground)
         self.aerial_attacks = CharacterAerialAttacks(aerial)
-        self.special_attacks = CharacterSpecialAttacks(special)
+        self.special_attacks = self.__create_unique_dto_for_specials_if_necessary(special)
         self.throw_attacks = CharacterThrowAttacks(throw)
         self.dodges = CharacterDodgeAttributes(dodges)
         self.misc_data = CharacterMiscAttributes(misc)
+
+    def __create_unique_dto_for_specials_if_necessary(self, specials):
+        """This method shouldn't have to exist. This is a pseudo-factory
+        for creating DTOs for the edge case characters that have otherwise
+        broken the CharacterSpecialAttacks DTO due to the author of
+        UltimateFrameData not keeping a consistent move organization scheme."""
+        if self.character_name == "mii_brawler":
+            return MiiBrawlerSpecialAttacks(specials)
+        elif self.character_name == "mii_gunner":
+            return MiiGunnerSpecialAttacks(specials)
+        elif self.character_name == "mii_swordfighter":
+            return MiiSwordFighterSpecialAttacks(specials)
+        elif self.character_name == "terry":
+            return TerrySpecialAttacks(specials)
+        else:
+            return CharacterSpecialAttacks(specials)
+    
+    # def __create_terry_dto_for_dodge_if_necessary(self, dodges):
+    #     """Neither should this one, but I kinda get it since it's
+    #     a weird mechanic that no one else has
+    #     """
+    #     if 
 
 class CharacterGroundAttacks(object):
     def __init__(self, moves):
@@ -49,6 +71,68 @@ class CharacterSpecialAttacks(object):
     def __init__(self, moves):
         self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
         self.side_special = next(s for s in moves if "side" in s.name.lower())
+        self.up_special = next(u for u in moves if "up" in u.name.lower())
+        self.down_special = next(d for d in moves if "down" in d.name.lower())
+
+class MiiBrawlerSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii Brawler:
+    """
+    neutral_moves = ["Shot Put", "Flashing Mach Punch", "Exploding Side Kick"]
+    side_moves = ["Onslaught", "Burning Dropkick", "Suplex"]
+    up_moves = ["Soaring Axe Kick", "Helicopter Kick", "Thrust Uppercut"]
+    down_moves = ["Head-On Assault", "Feint Jump", "Counter Throw"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class MiiSwordFighterSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii SwordFighter:
+    """
+    neutral_moves = ["Gale Strike", "Shuriken of Light", "Blurring Blade"]
+    side_moves = ["Airborne Assault", "Gale Stab", "Chakram"]
+    up_moves = ["Stone Scabbard", "Skyward Slash Dash", "Hero's Spin"]
+    down_moves = ["Blade Counter", "Reversal Slash", "Power Thrust"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class MiiGunnerSpecialAttacks(object):
+    """The Miis need special attention because they can have a bunch of
+    different move combinations and the dude who made the frame data website 
+    just shoved every last Mii move under "specials". For the Mii Gunner:
+    """
+    neutral_moves = ["Charge Blast", "Laser Blaze", "Grenade Launch"]
+    side_moves = ["Flame Pillar", "Stealth Burst", "Gunner Missile"]
+    up_moves = ["Lunar Launch", "Cannon Jump Kick", "Arm Rocket"]
+    down_moves = ["Echo Reflector", "Bomb Drop", "Absorbing Vortex"]
+
+    def __init__(self, moves):
+        self.neutral_special = [n for n in moves if any(m in self.neutral_moves for m in n.name.lower())]
+        self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
+        self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
+        self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class TerrySpecialAttacks(object):
+    """Terry also requires special attention because he has a "forward" 
+    B/Special and a "back" B/Special. These can be grouped as Side
+    B/Special and just labeled with a direction but noooooooooo, we need
+    to break protocol for Terry too.
+    
+    Nothing's actually different about the class fields, but the population
+    for the side_special field is different because of the above difference."""
+    def __init__(self, moves):
+        self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
+        self.side_special = next(s for s in moves if "forward" in s.name.lower() or "back" in s.name.lower())
         self.up_special = next(u for u in moves if "up" in u.name.lower())
         self.down_special = next(d for d in moves if "down" in d.name.lower())
 
@@ -106,6 +190,20 @@ class CharacterDodge(CharacterAction):
     def __init__(self, dodge_dict):
         super().__init__(dodge_dict)
 
+class TerryDodge(CharacterDodge):
+    """Terry's a special snowflake and can u-tilt immediately out of spot dodge.
+    Instead of putting this in the notes for u-tilt, where it would be relevant
+    and an actual note about the move, the author of the website was like 'DUAHH
+    IT'S A DODGE GUIZ' and now Terry has become another edge case that needs to be
+    handled where a dodge attack.... has base damage....
+    """
+    def __init__(self, dodge_dict):
+        super().__init__(dodge_dict)
+        self.advantage = dodge_dict["advantage"]
+        self.hitbox = dodge_dict["hitboximg"]
+        self.active_frames = dodge_dict["activeframes"]
+        self.startup = dodge_dict["startup"]
+
 # Ugh. There's a weird edge case that isn't covered in the move abstraction.
 # TODO: Revisit the class hierarchy to fix this weird abstraction "failure"
 class CharacterThrow(CharacterAction):
@@ -122,6 +220,12 @@ class CharacterThrow(CharacterAction):
         self.startup_frames = throw_dict["startup"]
         self.base_damage = throw_dict["basedamage"]
 
+class CharacterThrowActiveFrames(CharacterThrow):
+    """Some characters have grabs/throws with active frames, like Kirby."""
+    def __init__(self, throw_dict):
+        super().__init__(throw_dict)
+        self.active_frames = throw_dict["activeframes"]
+
 class CharacterAttack(CharacterAction):
     """Represents the data for any aggressive attack a character could make while in combat"""
     def __init__(self, attack_dict):
@@ -132,5 +236,8 @@ class CharacterAttack(CharacterAction):
         self.shield_stun = attack_dict["shieldstun"]
         self.multiple_hitboxes = attack_dict["whichhitbox"]
         self.advantage = attack_dict["advantage"]
-        self.active_frames = attack_dict["activeframes"]
-        self.hitbox = attack_dict["hitboximg"]
+        self.active_frames = attack_dict.get("activeframes", None)
+        # Some character attacks don't even have hitbox sections (?????)
+        # so if there's no value assoc w/ the hitbox key, assign None so
+        # the attack class can still be instantiated
+        self.hitbox = attack_dict.get("hitboximg", None)

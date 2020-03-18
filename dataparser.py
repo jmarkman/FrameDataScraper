@@ -4,7 +4,7 @@ class HtmlDataParser(object):
     """This class handles parsing out the data from the html elements representing moves"""
     def __init__(self, html):
         self.html = html
-    
+
     def get_data_from_element(self, html_element, element_class_name=None):
         """Retrieves the inner text from the specified html element
 
@@ -18,9 +18,9 @@ class HtmlDataParser(object):
             The inner text of the element as a string
         """
         if element_class_name is None:
-            data = self.html.find(html_element)
+            data = self.html.find(lambda tag: tag.name == html_element)
         else:
-            data = self.html.find(html_element, element_class_name)
+            data = self.html.find(lambda tag: tag.name == html_element and tag.get('class') == [element_class_name])
 
         if data is not None:
             return data.text.strip()
@@ -42,8 +42,8 @@ class AttackDataParser(HtmlDataParser):
         # Get hitboxes container
         hitbox_container = self.html.find_all("a", class_="hitboximg")
         hitboxImgUrls = []
-        if len(hitbox_container) < 1:
-           return hitboxImgUrls        
+        if not hitbox_container:
+           return None        
         for h in hitbox_container:
             # Access the url of the hitbox animation via attribute dictionary
             url = h['data-featherlight'].strip()

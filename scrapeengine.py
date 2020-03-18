@@ -36,6 +36,8 @@ class ScrapeEngine(object):
         # There are 6 sections: ground moves, aerials, specials, throws, dodges, and misc info
         char_moves = page_data.find_all("div", class_="moves")
 
+        char_moves = self.__ensure_containers_hold_moves(char_moves)
+
         ground_data = self.__get_action_frame_data(char_moves[0])
         aerial_data = self.__get_action_frame_data(char_moves[1])
         specials_data = self.__get_action_frame_data(char_moves[2])
@@ -77,8 +79,11 @@ class ScrapeEngine(object):
             # If the element couldn't be found, skip it and try the next
             # (This covers elements that BS4 reports as nonexistent 
             # or empty hitbox visualization lists)
-            if data is None or not data:
-                continue
+            if data is None:
+                if c == "hitboximg":
+                    parsed_data[c] = None
+                else:
+                    continue
             else:
                 parsed_data[c] = data
         return self.__generate_dto(parsed_data)
@@ -92,15 +97,41 @@ class ScrapeEngine(object):
             The appropriate DTO
         """
         keys_in_pdd = len(list(parsed_data_dict.keys()))
-        # A dodge has 4 items: name, total frames, landing lag, and any misc notes
-        if keys_in_pdd == 4:
+        # A dodge can have 4 or 5 different items because if you give a kid
+        # some HTML tags he'll sprinkle them everywhere, trying to make
+        # round pegs fit in square holes 
+        if keys_in_pdd == 4 or keys_in_pdd == 5:
             return dto.CharacterDodge(parsed_data_dict)
-        # A throw has 7 items: 4 from the base class, a hitbox visualization,
-        # startup frames, and base damage
+        # Unless it's Terry's spot-dodge mechanic where he can u-tilt out of spot dodge
+        # because the dude who wrote this website thinks an attack is a dodge
+        elif parsed_data_dict["movename"].lower() == "spot dodge attack":
+            return dto.TerryDodge(parsed_data_dict)
+        # A throw has 7 items. 
         elif keys_in_pdd == 7:
             return dto.CharacterThrow(parsed_data_dict)
+        # Unless it has 8, then it's a throw with active frames.
+        elif keys_in_pdd == 8:
+            return dto.CharacterThrowActiveFrames(parsed_data_dict)
+        # Ok, now it DEFINITELY has to be an attack.
         else:
             return dto.CharacterAttack(parsed_data_dict)
+
+    def __ensure_containers_hold_moves(self, retrieved_elements):
+        """Some characters like Bowser might have extraneous information placed in 'move' 
+        tags for some reason. Ensure that the move containers ONLY hold moves and not one-off
+        pieces of data.
+
+        Args:
+            retrieved_elements: the html containers that hold all of the character's moves
+        Returns:
+            A sliced list that skips the first container if it has extraneous information.
+            Else, returns the original list.
+        """
+        dumb_container = retrieved_elements[0].find(lambda tag: tag.name == 'div' and tag.get('class') == ['movecontainer', 'plain'])
+        if dumb_container is None:
+            return retrieved_elements
+        else:
+            return retrieved_elements[1:]
 
     def __get_misc_data(self, misc_attributes):
         return []
