@@ -25,19 +25,24 @@ class Character(object):
         self.character_name = name
         self.ground_attacks = CharacterGroundAttacks(ground)
         self.aerial_attacks = CharacterAerialAttacks(aerial)
-        self.special_attacks = self.__create_mii_dto_for_specials_if_necessary(special)
+        self.special_attacks = self.__create_unique_dto_for_specials_if_necessary(special)
         self.throw_attacks = CharacterThrowAttacks(throw)
         self.dodges = CharacterDodgeAttributes(dodges)
         self.misc_data = CharacterMiscAttributes(misc)
 
-    def __create_mii_dto_for_specials_if_necessary(self, specials):
-        """This method shouldn't have to exist"""
+    def __create_unique_dto_for_specials_if_necessary(self, specials):
+        """This method shouldn't have to exist. This is a pseudo-factory
+        for creating DTOs for the edge case characters that have otherwise
+        broken the CharacterSpecialAttacks DTO due to the author of
+        UltimateFrameData not keeping a consistent move organization scheme."""
         if self.character_name == "mii_brawler":
             return MiiBrawlerSpecialAttacks(specials)
         elif self.character_name == "mii_gunner":
             return MiiGunnerSpecialAttacks(specials)
         elif self.character_name == "mii_swordfighter":
             return MiiSwordFighterSpecialAttacks(specials)
+        elif self.character_name == "terry":
+            return TerrySpecialAttacks(specials)
         else:
             return CharacterSpecialAttacks(specials)
     
@@ -116,6 +121,19 @@ class MiiGunnerSpecialAttacks(object):
         self.side_special = [s for s in moves if any(m in self.side_moves for m in s.name.lower())]
         self.up_special = [u for u in moves if any(m in self.up_moves for m in u.name.lower())]
         self.down_special = [d for d in moves if any(m in self.down_moves for m in d.name.lower())]
+
+class TerrySpecialAttacks(object):
+    """Terry also requires special attention because he has a "forward" 
+    B/Special and a "back" B/Special. These can be grouped as Side
+    B/Special and just labeled with a direction but noooooooooo, we need
+    to break protocol for Terry too.
+    
+    Nothing's actually different about the class fields, but the population
+    for the side_special field is different because of the above difference."""
+    self.neutral_special = next(n for n in moves if "neutral" in n.name.lower())
+    self.side_special = next(s for s in moves if "forward" in s.name.lower() or "back" in s.name.lower())
+    self.up_special = next(u for u in moves if "up" in u.name.lower())
+    self.down_special = next(d for d in moves if "down" in d.name.lower())
 
 class CharacterThrowAttacks(object):
     def __init__(self, moves):
