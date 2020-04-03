@@ -160,7 +160,7 @@ class CharacterDodgeAttributes(object):
         self.up_diagonal_air_dodge = next(ud for ud in moves if ud.name.lower() == "air dodge, diagonally up")
 
 class CharacterMiscAttributes(object):
-    def __init__(self, attributes):
+    def __init__(self, attributes_dict):
         self.weight = 0.0
         self.gravity = 0.0
         self.walk_speed = 0.0

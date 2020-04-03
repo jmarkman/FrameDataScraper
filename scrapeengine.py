@@ -134,6 +134,7 @@ class ScrapeEngine(object):
             return retrieved_elements[1:]
 
     def __get_misc_data(self, misc_attributes):
+        parser = hdp.MiscDataParser(misc_attributes)
         return []
 
 
