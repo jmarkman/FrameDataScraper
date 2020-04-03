@@ -57,6 +57,13 @@ class MiscDataParser(HtmlDataParser):
         self.unicode_em_dash = u'\u2014'
     
     def get_all_misc_data(self):
+        """Retrieves all data from the 'misc info' section of the character's frame
+        data page and attempts a first-pass cleaning of the data from the page
+
+        Returns:
+            A dictionary of the attributes and their respective values from
+            the 'misc info' section
+        """
         # Get all the elements in the misc info container except for the grab graphic
         misc_data_elements = self.html.find(lambda tag: tag.name == "div" and tag.get('class') != ['movecontainer'])
         # From the complete list, get all the regular divs with information
@@ -70,11 +77,11 @@ class MiscDataParser(HtmlDataParser):
             split_text_data = msc.text.split(self.unicode_em_dash)
             if "/" in msc.text:
                 coupled_data = self.__split_data_loosely_coupled_by_forward_slash(split_text_data)
+                for k, v in coupled_data:
+                    misc_data_dict[k] = v
             else:
                 normal_entry_tuple = self.__create_entry_from_regular_misc_data(split_text_data)
                 misc_data_dict[normal_entry_tuple[0]] = normal_entry_tuple[1]
-
-
         return misc_data_dict
 
     def __create_entry_from_regular_misc_data(self, data):
@@ -110,7 +117,8 @@ class MiscDataParser(HtmlDataParser):
         split_values = split_data[1].split('/')
         data_dict = {}
         for k,v in zip(split_keys, split_values):
-            data_dict[k] = v
+            formatted_key = self.__convert_to_readable_key(k)
+            data_dict[formatted_key] = v
         return data_dict
 
     def __convert_to_readable_key(self, key):
