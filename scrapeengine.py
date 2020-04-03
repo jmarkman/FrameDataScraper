@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 class ScrapeEngine(object):
 
-    ufdUrl = 'https://ultimateframedata.com/'
+    ufd_url = 'https://ultimateframedata.com/'
     html_classes = [
             "hitboximg", "movename", "startup",
             "totalframes", "landinglag", "notes",
@@ -22,7 +22,7 @@ class ScrapeEngine(object):
         Returns:
             The html of the character's frame data page as a BeautifulSoup object
         """
-        page_data = requests.get('{0}{1}.php'.format(self.ufdUrl, self.character_name))
+        page_data = requests.get('{0}{1}.php'.format(self.ufd_url, self.character_name))
         return BeautifulSoup(page_data.text, 'lxml')
 
     def get_frame_data(self, page_data):
