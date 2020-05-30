@@ -66,10 +66,12 @@ class MiscDataParser(HtmlDataParser):
         """
         # Get all the elements in the misc info container except for the grab graphic
         misc_data_elements = self.html.find(lambda tag: tag.name == "div" and tag.get('class') != ['movecontainer'])
+        # Remove all the newline elements
+        misc_data_elements = [n for n in misc_data_elements if n != '\n']
         # From the complete list, get all the regular divs with information
-        regular_misc_data = [e for e in misc_data_elements if 'oos' not in t.get('class')]
+        regular_misc_data = [e for e in misc_data_elements if not e.attrs]
         # Then, from the complete list, get all the divs with out of shield information
-        oos_elements = [t for t in misc_data_elements if 'oos' in t.get('class')]
+        oos_elements = [t for t in misc_data_elements if t.attrs]
         # We're gonna shove everything in this dictionary in the end
         misc_data_dict = {}
 
@@ -97,7 +99,7 @@ class MiscDataParser(HtmlDataParser):
         Returns:
             A tuple containing a formatted key and its value
         """
-        readable_key = self.__convert_to_readable_key(split_text_data[0])
+        readable_key = self.__convert_to_readable_key(data[0])
         assoc_value = split_text_data[1]
         return (readable_key, assoc_value)
 
