@@ -76,7 +76,7 @@ class MiscDataParser(HtmlDataParser):
         misc_data_dict = {}
 
         for msc in regular_misc_data:
-            split_text_data = msc.text.split(self.unicode_em_dash)
+            split_text_data = self.__parse_data_from_html(msc.text)
             if "/" in msc.text:
                 coupled_data = self.__split_data_loosely_coupled_by_forward_slash(split_text_data)
                 for k, v in coupled_data:
@@ -85,6 +85,21 @@ class MiscDataParser(HtmlDataParser):
                 normal_entry_tuple = self.__create_entry_from_regular_misc_data(split_text_data)
                 misc_data_dict[normal_entry_tuple[0]] = normal_entry_tuple[1]
         return misc_data_dict
+
+    def __parse_data_from_html(self, data):
+        """Parses the textual data from the HTML element representing
+        the current misc data element
+        
+        Args:
+            data:
+                The current 'misc info' HTML element
+        Returns:
+            A list containing the split and whitespace-stripped 
+            information from the element
+        """
+        split_data = data.split(self.unicode_em_dash)
+        split_data = [x.strip() for x in split_data]
+        return split_data
 
     def __create_entry_from_regular_misc_data(self, data):
         """Creates a tuple based on the provided data from the
@@ -100,7 +115,7 @@ class MiscDataParser(HtmlDataParser):
             A tuple containing a formatted key and its value
         """
         readable_key = self.__convert_to_readable_key(data[0])
-        assoc_value = split_text_data[1]
+        assoc_value = self.__clean_associated_value(data[1])
         return (readable_key, assoc_value)
 
     def __split_data_loosely_coupled_by_forward_slash(self, split_data):
@@ -130,33 +145,43 @@ class MiscDataParser(HtmlDataParser):
 
         Args:
             key: The key to sanitize into something readable
-        
         Returns:
             The sanitized key as a string
         """
         lowercase_key = key.lower()
 
-        if ' ' in lowercase_key == False:
-            if lowercase_key == "sh":
-                return "shorthop"
-            elif lowercase_key == "fh":
-                return "fullhop"
-            elif lowercase_key == "shff":
-                return lowercase_key
+        def switch(case):
+            conditions = {
+                "walk speed": "walkspd",
+                "run speed": "runspd",
+                "initial dash": "initdash",
+                "air speed": "airspd",
+                "total air acceleration": "airaccel",
+                "sh": "shorthop",
+                "fh": "fullhop",
+                "shff": "shorthopfastfall",
+                "fhff": "fullhopfastfall",
+                "fall speed": "fallspd",
+                "fast fall speed": "fastfallspd",
+                "shield grab (grab, post-shieldstun)": lambda x: x[:11].replace(' ', ''),
+                "shield drop": lambda x: x.replace(' ', '')
+            }
+            return conditions[case] if case in conditions else None
+        
+        result = switch(lowercase_key)
+
+        if result is not None:
+            return result
         else:
-            if "walk" in lowercase_key:
-                return "walkspeed"
-            elif "run" in lowercase_key:
-                return "runspeed"
-            elif "dash" in lowercase_key:
-                return "initdash"
-            elif lowercase_key == "air speed":
-                return lowercase_key.replace(' ', '')
-            elif "acceleration" in lowercase_key:
-                return "airaccel"
+            return lowercase_key
 
     def __create_out_of_shield_key(self, oos_key):
         pass
 
-
+    def __clean_associated_value(self, data):
+        """The values associated with each section will have extra spaces
+        and unnecessary string qualifiers (i.e., 'frames', '(universal)')
+        """
+        # TODO: just strip any extra whitespace, make more specific
+        return data.strip()
         
