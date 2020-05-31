@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import re
 
 class HtmlDataParser(object):
     """This class handles parsing out the data from the html elements representing moves"""
@@ -150,9 +151,8 @@ class MiscDataParser(HtmlDataParser):
         """
         lowercase_key = key.lower().strip()
 
-        # There's one singular case where this is necessary
-        # FHFF ends in 'Frames' and that part needs to be removed
-        if "frames" in lowercase_key:
+        # full-hop fastfall needs to have the 'frames' part removed
+        if "fhff" in lowercase_key:
             lowercase_key = lowercase_key.replace("frames", '').strip()
 
         def switch(case):
@@ -169,7 +169,8 @@ class MiscDataParser(HtmlDataParser):
                 "fall speed": "fallspd",
                 "fast fall speed": "fastfallspd",
                 "shield grab (grab, post-shieldstun)": "shieldgrab",
-                "shield drop": "shielddrop"
+                "shield drop": "shielddrop",
+                "jump squat (pre-jump frames)": "jumpsquat"
             }
             return conditions[case] if case in conditions else None
         
@@ -187,6 +188,12 @@ class MiscDataParser(HtmlDataParser):
         """The values associated with each section will have extra spaces
         and unnecessary string qualifiers (i.e., 'frames', '(universal)')
         """
-        # TODO: just strip any extra whitespace, make more specific
-        return data.strip()
+        clean_value = data.strip()
+        if "frames" in data:
+            match = re.search("[0-9]\.?[0-9]{0,}", clean_value)
+            if match:
+                clean_value = match.group().strip()
+            else:
+                print("__clean_associated_value failed to clean {0}".format(data))
+        return clean_value
         
