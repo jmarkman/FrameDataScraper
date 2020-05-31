@@ -161,21 +161,23 @@ class CharacterDodgeAttributes(object):
 
 class CharacterMiscAttributes(object):
     def __init__(self, attributes_dict):
-        self.weight = 0.0
-        self.gravity = 0.0
-        self.walk_speed = 0.0
-        self.run_speed = 0.0
-        self.initial_dash_speed = 0.0
-        self.air_speed = 0.0
-        self.total_air_acceleration = 0.0
-        self.short_hop_frames = 0
-        self.full_hop_frames = 0
-        self.short_hop_fast_fall_frames = 0
-        self.full_hop_fast_fall_frames = 0
+        self.weight = float(attributes_dict["weight"])
+        self.gravity = float(attributes_dict["gravity"])
+        self.walk_speed = float(attributes_dict["walkspd"])
+        self.run_speed = float(attributes_dict["runspd"])
+        self.initial_dash_speed = float(attributes_dict["initdash"])
+        self.air_speed = float(attributes_dict["airspd"])
+        self.total_air_acceleration = float(attributes_dict["airaccel"])
+        self.fall_speed = float(attributes_dict["fallspd"])
+        self.fast_fall_speed = float(attributes_dict["fastfallspd"])
+        self.short_hop_frames = int(attributes_dict["shorthop"])
+        self.full_hop_frames = int(attributes_dict["fullhop"])
+        self.short_hop_fast_fall_frames = int(attributes_dict["shorthopfastfall"])
+        self.full_hop_fast_fall_frames = int(attributes_dict["fullhopfastfall"])
         self.fastest_out_of_shield_options = []
-        self.shield_grab_post_shield_stun = 0
-        self.shield_drop = 11
-        self.jump_squat = 3
+        self.shield_grab_post_shield_stun = int(attributes_dict["shieldgrab"])
+        self.shield_drop = int(attributes_dict["shielddrop"])
+        self.jump_squat = int(attributes_dict["jumpsquat"])
 
 class CharacterAction(object):
     """Represents the data for any possible action that a character could perform while in combat"""
