@@ -79,7 +79,7 @@ class MiscDataParser(HtmlDataParser):
             split_text_data = self.__parse_data_from_html(msc.text)
             if "/" in msc.text:
                 coupled_data = self.__split_data_loosely_coupled_by_forward_slash(split_text_data)
-                for k, v in coupled_data:
+                for k, v in coupled_data.items():
                     misc_data_dict[k] = v
             else:
                 normal_entry_tuple = self.__create_entry_from_regular_misc_data(split_text_data)
@@ -135,7 +135,7 @@ class MiscDataParser(HtmlDataParser):
         data_dict = {}
         for k,v in zip(split_keys, split_values):
             formatted_key = self.__convert_to_readable_key(k)
-            data_dict[formatted_key] = v
+            data_dict[formatted_key] = self.__clean_associated_value(v)
         return data_dict
 
     def __convert_to_readable_key(self, key):
@@ -148,7 +148,12 @@ class MiscDataParser(HtmlDataParser):
         Returns:
             The sanitized key as a string
         """
-        lowercase_key = key.lower()
+        lowercase_key = key.lower().strip()
+
+        # There's one singular case where this is necessary
+        # FHFF ends in 'Frames' and that part needs to be removed
+        if "frames" in lowercase_key:
+            lowercase_key = lowercase_key.replace("frames", '').strip()
 
         def switch(case):
             conditions = {
@@ -163,8 +168,8 @@ class MiscDataParser(HtmlDataParser):
                 "fhff": "fullhopfastfall",
                 "fall speed": "fallspd",
                 "fast fall speed": "fastfallspd",
-                "shield grab (grab, post-shieldstun)": lambda x: x[:11].replace(' ', ''),
-                "shield drop": lambda x: x.replace(' ', '')
+                "shield grab (grab, post-shieldstun)": "shieldgrab",
+                "shield drop": "shielddrop"
             }
             return conditions[case] if case in conditions else None
         
