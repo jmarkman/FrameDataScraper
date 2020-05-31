@@ -75,6 +75,7 @@ class MiscDataParser(HtmlDataParser):
         oos_elements = [t for t in misc_data_elements if t.attrs]
         # We're gonna shove everything in this dictionary in the end
         misc_data_dict = {}
+        parsed_oos_moves = []
 
         for msc in regular_misc_data:
             split_text_data = self.__parse_data_from_html(msc.text)
@@ -85,6 +86,14 @@ class MiscDataParser(HtmlDataParser):
             else:
                 normal_entry_tuple = self.__create_entry_from_regular_misc_data(split_text_data)
                 misc_data_dict[normal_entry_tuple[0]] = normal_entry_tuple[1]
+
+        for oos in oos_elements:
+            split_oos_data = self.__parse_data_from_html(oos.text)
+            parsed_oos_data = self.__create_out_of_shield_entry(split_oos_data)
+            parsed_oos_moves.append(parsed_oos_data)
+
+        misc_data_dict["oos"] = parsed_oos_moves
+        
         return misc_data_dict
 
     def __parse_data_from_html(self, data):
@@ -181,8 +190,18 @@ class MiscDataParser(HtmlDataParser):
         else:
             return lowercase_key
 
+    def __create_out_of_shield_entry(self, oos_data):
+        oos_entry = {}
+        move = self.__create_out_of_shield_key(oos_data[0])
+        startup_frames = self.__clean_associated_value(oos_data[1])
+        oos_entry["move"] = move
+        oos_entry["startup"] = int(startup_frames)
+        return oos_entry
+
     def __create_out_of_shield_key(self, oos_key):
-        pass
+        comma_location = oos_key.find(',')
+        move = oos_key[comma_location + 1:]
+        return move.strip()
 
     def __clean_associated_value(self, data):
         """The values associated with each section will have extra spaces

@@ -174,7 +174,7 @@ class CharacterMiscAttributes(object):
         self.full_hop_frames = int(attributes_dict["fullhop"])
         self.short_hop_fast_fall_frames = int(attributes_dict["shorthopfastfall"])
         self.full_hop_fast_fall_frames = int(attributes_dict["fullhopfastfall"])
-        self.fastest_out_of_shield_options = []
+        self.fastest_out_of_shield_options = attributes_dict["oos"]
         self.shield_grab_post_shield_stun = int(attributes_dict["shieldgrab"])
         self.shield_drop = int(attributes_dict["shielddrop"])
         self.jump_squat = int(attributes_dict["jumpsquat"])
