@@ -161,23 +161,23 @@ class CharacterDodgeAttributes(object):
 
 class CharacterMiscAttributes(object):
     def __init__(self, attributes_dict):
-        self.weight = float(attributes_dict["weight"])
-        self.gravity = float(attributes_dict["gravity"])
-        self.walk_speed = float(attributes_dict["walkspd"])
-        self.run_speed = float(attributes_dict["runspd"])
-        self.initial_dash_speed = float(attributes_dict["initdash"])
-        self.air_speed = float(attributes_dict["airspd"])
-        self.total_air_acceleration = float(attributes_dict["airaccel"])
-        self.fall_speed = float(attributes_dict["fallspd"])
-        self.fast_fall_speed = float(attributes_dict["fastfallspd"])
-        self.short_hop_frames = int(attributes_dict["shorthop"])
-        self.full_hop_frames = int(attributes_dict["fullhop"])
-        self.short_hop_fast_fall_frames = int(attributes_dict["shorthopfastfall"])
-        self.full_hop_fast_fall_frames = int(attributes_dict["fullhopfastfall"])
+        self.weight = attributes_dict["weight"]
+        self.gravity = attributes_dict["gravity"]
+        self.walk_speed = attributes_dict["walkspd"]
+        self.run_speed = attributes_dict["runspd"]
+        self.initial_dash_speed = attributes_dict["initdash"]
+        self.air_speed = attributes_dict["airspd"]
+        self.total_air_acceleration = attributes_dict["airaccel"]
+        self.fall_speed = attributes_dict["fallspd"]
+        self.fast_fall_speed = attributes_dict["fastfallspd"]
+        self.short_hop_frames = attributes_dict["shorthop"]
+        self.full_hop_frames = attributes_dict["fullhop"]
+        self.short_hop_fast_fall_frames = attributes_dict["shorthopfastfall"]
+        self.full_hop_fast_fall_frames = attributes_dict["fullhopfastfall"]
         self.fastest_out_of_shield_options = attributes_dict["oos"]
-        self.shield_grab_post_shield_stun = int(attributes_dict["shieldgrab"])
-        self.shield_drop = int(attributes_dict["shielddrop"])
-        self.jump_squat = int(attributes_dict["jumpsquat"])
+        self.shield_grab_post_shield_stun = attributes_dict["shieldgrab"]
+        self.shield_drop = attributes_dict["shielddrop"]
+        self.jump_squat = attributes_dict["jumpsquat"]
 
 class CharacterAction(object):
     """Represents the data for any possible action that a character could perform while in combat"""
