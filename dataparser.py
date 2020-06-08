@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 import difflib
+from dataformat import MiscDataFormatter
 
 class HtmlDataParser(object):
     """This class handles parsing out the data from the html elements representing moves"""
@@ -58,6 +59,7 @@ class MiscDataParser(HtmlDataParser):
         # The author uses an emdash instead of a regular dash to separate data
         self.unicode_em_dash = u'\u2014'
         self.character = char_name
+        self.misc_data_formatter = MiscDataFormatter(self.character)
 
     def get_all_misc_data(self):
         """Retrieves all data from the 'misc info' section of the character's frame
@@ -116,6 +118,7 @@ class MiscDataParser(HtmlDataParser):
         split_data = data.split(self.unicode_em_dash)
         split_data = [x.strip() for x in split_data]
 
+        # The following "if" statements take Cloud's stat changes from Limit Break into account
         if self.character == "cloud" and split_data[1].find('L') != -1 and split_data[0].find('/') == -1:
             regular_val = re.search("\d.\d*", split_data[1])
             limit_val = re.search("\d.\d*", split_data[2])
@@ -168,75 +171,15 @@ class MiscDataParser(HtmlDataParser):
         split_values = split_data[1].split('/')
         data_dict = {}
         for k,v in zip(split_keys, split_values):
-            formatted_key = self.__convert_to_readable_key(k)
-            data_dict[formatted_key] = self.__clean_associated_value(v)
+            formatted_key = self.misc_data_formatter.convert_attribute_to_readable_key(k)
+            data_dict[formatted_key] = self.misc_data_formatter.format_value_associated_with_key(v)
         return data_dict
-
-    def __convert_to_readable_key(self, key):
-        """Since the "keys" for the misc section dictionary are being
-        ripped directly from the site, this method will clean the
-        provided key, making it into a more programmer-digestable form
-
-        Args:
-            key: The key to sanitize into something readable
-        Returns:
-            The sanitized key as a string
-        """
-        lowercase_key = key.lower().strip()
-
-        # full-hop fastfall needs to have the 'frames' part removed
-        if "fhff" in lowercase_key:
-            lowercase_key = lowercase_key.replace("frames", '').strip()
-
-        def switch(case):
-            conditions = {
-                "walk speed": "walkspd",
-                "run speed": "runspd",
-                "initial dash": "initdash",
-                "air speed": "airspd",
-                "total air acceleration": "airaccel",
-                "sh": "shorthop",
-                "fh": "fullhop",
-                "shff": "shorthopfastfall",
-                "fhff": "fullhopfastfall",
-                "fall speed": "fallspd",
-                "fast fall speed": "fastfallspd",
-                "shield grab (grab, post-shieldstun)": "shieldgrab",
-                "shield drop": "shielddrop",
-                "jump squat (pre-jump frames)": "jumpsquat"
-            }
-            return conditions[case] if case in conditions else None
-        
-        result = switch(lowercase_key)
-
-        if result is not None:
-            return result
-        else:
-            return lowercase_key
 
     def __create_out_of_shield_entry(self, oos_data):
         oos_entry = {}
-        move = self.__create_out_of_shield_key(oos_data[0])
-        startup_frames = self.__clean_associated_value(oos_data[1])
+        move = self.misc_data_formatter.create_out_of_shield_key(oos_data[0])
+        startup_frames = self.misc_data_formatter.format_value_associated_with_key(oos_data[1])
         oos_entry["move"] = move
         oos_entry["startup"] = int(startup_frames)
         return oos_entry
-
-    def __create_out_of_shield_key(self, oos_key):
-        comma_location = oos_key.find(',')
-        move = oos_key[comma_location + 1:]
-        return move.strip()
-
-    def __clean_associated_value(self, data):
-        """The values associated with each section will have extra spaces
-        and unnecessary string qualifiers (i.e., 'frames', '(universal)')
-        """
-        clean_value = data.strip()
-        if "frames" in data:
-            match = re.search("[0-9]\.?[0-9]{0,}", clean_value)
-            if match:
-                clean_value = match.group().strip()
-            else:
-                print("__clean_associated_value failed to clean {0}".format(data))
-        return clean_value
         
