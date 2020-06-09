@@ -151,8 +151,8 @@ class MiscDataParser(HtmlDataParser):
         Returns:
             A tuple containing a formatted key and its value
         """
-        readable_key = self.__convert_to_readable_key(data[0])
-        assoc_value = self.__clean_associated_value(data[1])
+        readable_key = self.misc_data_formatter.convert_attribute_to_readable_key(data[0])
+        assoc_value = self.misc_data_formatter.format_value_associated_with_key(data[1])
         return (readable_key, assoc_value)
 
     def __split_data_loosely_coupled_by_forward_slash(self, split_data):
