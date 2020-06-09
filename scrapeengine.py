@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 class ScrapeEngine(object):
 
-    ufdUrl = 'https://ultimateframedata.com/'
+    ufd_url = 'https://ultimateframedata.com/'
     html_classes = [
             "hitboximg", "movename", "startup",
             "totalframes", "landinglag", "notes",
@@ -22,7 +22,7 @@ class ScrapeEngine(object):
         Returns:
             The html of the character's frame data page as a BeautifulSoup object
         """
-        page_data = requests.get('{0}{1}.php'.format(self.ufdUrl, self.character_name))
+        page_data = requests.get('{0}{1}.php'.format(self.ufd_url, self.character_name))
         return BeautifulSoup(page_data.text, 'lxml')
 
     def get_frame_data(self, page_data):
@@ -43,7 +43,7 @@ class ScrapeEngine(object):
         specials_data = self.__get_action_frame_data(char_moves[2])
         throws_data = self.__get_action_frame_data(char_moves[3])
         dodges_data = self.__get_action_frame_data(char_moves[4])
-        misc_data = self.__get_misc_data(char_moves[5])
+        misc_data = self.__get_misc_data(char_moves[5], self.character_name)
 
         return dto.Character(self.character_name, ground_data, aerial_data, specials_data, throws_data, dodges_data, misc_data)
 
@@ -133,7 +133,10 @@ class ScrapeEngine(object):
         else:
             return retrieved_elements[1:]
 
-    def __get_misc_data(self, misc_attributes):
-        return []
+    def __get_misc_data(self, misc_attributes, char_name):
+        """Retrieves any miscellaneous attributes for the character from their page"""
+        parser = hdp.MiscDataParser(misc_attributes, char_name)
+        parsed_misc_attributes = parser.get_all_misc_data()
+        return parsed_misc_attributes
 
 

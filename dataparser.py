@@ -1,4 +1,7 @@
 from bs4 import BeautifulSoup
+import re
+import difflib
+from dataformat import MiscDataFormatter
 
 class HtmlDataParser(object):
     """This class handles parsing out the data from the html elements representing moves"""
@@ -51,23 +54,132 @@ class AttackDataParser(HtmlDataParser):
         return hitboxImgUrls
 
 class MiscDataParser(HtmlDataParser):
-    def __init__(self, html):
+    def __init__(self, html, char_name):
         super().__init__(html)
-    
+        # The author uses an emdash instead of a regular dash to separate data
+        self.unicode_em_dash = u'\u2014'
+        self.character = char_name
+        self.misc_data_formatter = MiscDataFormatter(self.character)
+
     def get_all_misc_data(self):
-        misc_data_elements = self.html.find_all("div")
+        """Retrieves all data from the 'misc info' section of the character's frame
+        data page and attempts a first-pass cleaning of the data from the page
+
+        Returns:
+            A dictionary of the attributes and their respective values from
+            the 'misc info' section
+        """
+        # Get all the elements in the misc info container except for the grab graphic
+        misc_data_elements = self.html.find(lambda tag: tag.name == "div" and tag.get('class') != ['movecontainer'], recursive=False)
+        # Remove all the newline elements
+        misc_data_elements = [n for n in misc_data_elements if n != '\n']
+        # From the complete list, get all the regular divs with information
+        regular_misc_data = [e for e in misc_data_elements if not e.attrs]
+        # Then, from the complete list, get all the divs with out of shield information
+        oos_elements = [t for t in misc_data_elements if t.attrs]
+        # The author added "ledge grab" photos to the misc data section and I'm not going
+        # to work with that information unless it's desired
+        if len(oos_elements) > 3:
+            oos_elements = [o for o in oos_elements if difflib.get_close_matches("oos", o.attrs['class'])]
+        # We're gonna shove everything in this dictionary in the end
         misc_data_dict = {}
+        parsed_oos_moves = []
 
-        for d in misc_data_elements:
-            split_text_data = d.text.split('-')
-            if "/" in split_text_data[0]:
-                # split by backslash, then add
-                pass
+        for msc in regular_misc_data:
+            split_text_data = self.__parse_data_from_html(msc.text)
+            if "/" in msc.text:
+                coupled_data = self.__split_data_loosely_coupled_by_forward_slash(split_text_data)
+                for k, v in coupled_data.items():
+                    misc_data_dict[k] = v
             else:
-                misc_data_dict[split_text_data[0]] = split_text_data[1]
+                normal_entry_tuple = self.__create_entry_from_regular_misc_data(split_text_data)
+                misc_data_dict[normal_entry_tuple[0]] = normal_entry_tuple[1]
 
-    def __create_dict_key(self, text):
-        pass
+        for oos in oos_elements:
+            split_oos_data = self.__parse_data_from_html(oos.text)
+            parsed_oos_data = self.__create_out_of_shield_entry(split_oos_data)
+            parsed_oos_moves.append(parsed_oos_data)
 
-    def __split_by_backslash(self, text):
-        pass
+        misc_data_dict["oos"] = parsed_oos_moves
+        
+        return misc_data_dict
+
+    def __parse_data_from_html(self, data):
+        """Parses the textual data from the HTML element representing
+        the current misc data element
+        
+        Args:
+            data:
+                The current 'misc info' HTML element
+        Returns:
+            A list containing the split and whitespace-stripped 
+            information from the element
+        """
+        split_data = data.split(self.unicode_em_dash)
+        split_data = [x.strip() for x in split_data]
+
+        # The following "if" statements take Cloud's stat changes from Limit Break into account
+        if self.character == "cloud" and split_data[1].find('L') != -1 and split_data[0].find('/') == -1:
+            regular_val = re.search("\d.\d*", split_data[1])
+            limit_val = re.search("\d.\d*", split_data[2])
+            if regular_val and limit_val:
+                split_data[1] = "{0}, {1}".format(regular_val.group().strip(), limit_val.group().strip())
+                del split_data[2]
+        if self.character == "cloud" and "Fall Speed" in split_data[0]:
+            fallspd_regular_val = re.search("\d.\d*", split_data[1])
+            fallspd_limit_ff_reg_vals = re.findall("\d.\d*", split_data[2])
+            fastfallspd_limit_val = re.search("\d.\d*", split_data[3])
+            if fallspd_regular_val and fallspd_limit_ff_reg_vals and fastfallspd_limit_val:
+                split_data[1] = "{0}, {1} / {2}, {3}".format(
+                    fallspd_regular_val.group().strip(), fallspd_limit_ff_reg_vals[0].strip(), 
+                    fallspd_limit_ff_reg_vals[1].strip(), fastfallspd_limit_val.group().strip()
+                    )
+                del split_data[2]
+                del split_data[2]
+        return split_data
+
+    def __create_entry_from_regular_misc_data(self, data):
+        """Creates a tuple based on the provided data from the
+        current 'misc info' row if the data is nicely formatted
+        (i.e., in this case, it's a property separated by a dash
+        and then a value). This tuple will contain a legible key
+        for further use down the line and the associated value
+
+        Args:
+            data:
+                The current 'misc info' row
+        Returns:
+            A tuple containing a formatted key and its value
+        """
+        readable_key = self.misc_data_formatter.convert_attribute_to_readable_key(data[0])
+        assoc_value = self.misc_data_formatter.format_value_associated_with_key(data[1])
+        return (readable_key, assoc_value)
+
+    def __split_data_loosely_coupled_by_forward_slash(self, split_data):
+        """Creates a dictionary of all of the loosely coupled values
+        that are separated by forward slashes in the 'misc attributes'
+        category. This will handle the short/full hop frames row and
+        the fall speed frames row.
+
+        Args:
+            split_data:
+                The row data that was previously split at the emdash
+        Returns:
+            The loosely coupled values as a dictionary
+        """
+        split_keys = split_data[0].split('/')
+        split_values = split_data[1].split('/')
+        data_dict = {}
+        for k,v in zip(split_keys, split_values):
+            formatted_key = self.misc_data_formatter.convert_attribute_to_readable_key(k)
+            data_dict[formatted_key] = self.misc_data_formatter.format_value_associated_with_key(v)
+        return data_dict
+
+    def __create_out_of_shield_entry(self, oos_data):
+        oos_entry = {}
+        move = self.misc_data_formatter.create_out_of_shield_key(oos_data[0])
+        startup_frames = self.misc_data_formatter.format_value_associated_with_key(oos_data[1])
+        oos_entry["move"] = move
+        oos_entry["startup"] = int(startup_frames)
+        return oos_entry
+        
