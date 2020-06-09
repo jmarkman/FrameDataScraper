@@ -55,7 +55,7 @@ class Character(object):
 class CharacterGroundAttacks(object):
     def __init__(self, moves):
         self.jabs = [j for j in moves if "jab" in j.name.lower()]
-        self.tilts = [a for a in moves if "air" in a.name.lower()]
+        self.tilts = [a for a in moves if "tilt" in a.name.lower()]
         self.dash = next(d for d in moves if "dash" in d.name.lower())
         self.smashes = [s for s in moves if "smash" in s.name.lower()]
 

@@ -25,5 +25,12 @@ class DirectoryNav(object):
         if not path.exists(new_path):
             print(f"Creating new directory '{new_dir_name}' at path '{specified_path}'")
             os.makedirs(new_path)
+        else:
+            print(f"Directory '{new_path}' already exists, skipping creation")
         if return_new_dir_path:
             return new_path
+    
+    def does_file_exist_in_dir(self, specified_path, filename):
+        """Check that a specified file exists at a specified path"""
+        filepath = path.join(specified_path, filename)
+        return path.isfile(filepath)
