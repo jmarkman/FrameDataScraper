@@ -45,12 +45,6 @@ class Character(object):
             return TerrySpecialAttacks(specials)
         else:
             return CharacterSpecialAttacks(specials)
-    
-    # def __create_terry_dto_for_dodge_if_necessary(self, dodges):
-    #     """Neither should this one, but I kinda get it since it's
-    #     a weird mechanic that no one else has
-    #     """
-    #     if 
 
 class CharacterGroundAttacks(object):
     def __init__(self, moves):

@@ -74,3 +74,20 @@ class MiscDataFormatter(object):
         comma_location = oos_key.find(',')
         move = oos_key[comma_location + 1:]
         return move.strip()
+
+class StringFormat(object):
+    def __init__(self):
+        super().__init__()
+    
+    def format_character_name(self, character_name: str):
+        character_name = self.__split_name_if_necessary(character_name)
+        if isinstance(character_name, str):
+            return character_name.capitalize()
+        else:
+            pass
+    
+    def __split_name_if_necessary(self, name: str):
+        if name.find('_') < 0:
+            return name
+        else:
+            return name.split('_')

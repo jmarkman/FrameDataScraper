@@ -28,6 +28,9 @@ class DatabaseGenerator(object):
         cursor.execute(moves_table_query)
         conn.commit()
 
+    def populate_character_table(self):
+        pass
+
     def __build_sql_create_table_query(self, table_name, table_columns: dict):
         sql =  f"create table '{self.character_table_name}' ("
         for key, value in self.character_table_cols.items():
